@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PastePal - iOS Freedom Wall</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: linear-gradient(135deg, #fafafa 0%, #f5f5f7 100%);
+            min-height: 100vh;
+            padding: 0;
+            color: #1d1d1f;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 40px 20px 20px;
+        }
+
+        .header h1 {
+            font-size: 2.8rem;
+            font-weight: 700;
+            color: #007AFF;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+
+        .header p {
+            color: #8E8E93;
+            font-size: 1.1rem;
+            font-weight: 400;
+        }
+
+        .post-form {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 24px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            margin-bottom: 30px;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #007AFF;
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 16px;
+            border: 2px solid #E5E5EA;
+            border-radius: 12px;
+            font-size: 1rem;
+            resize: vertical;
+            min-height: 100px;
+            background: #FFFFFF;
+            transition: all 0.2s ease;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #007AFF;
+            box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
+        }
+
+        .btn {
+            background: #007AFF;
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        .btn:hover {
+            background: #0056CC;
+            transform: translateY(-1px);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .character-count {
+            color: #8E8E93;
+            font-size: 0.9rem;
+            margin-top: 8px;
+            text-align: right;
+        }
+
+        .messages-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 20px;
+        }
+
+        .message-card {
+            background: rgba(255, 255, 255, 0.98);
+            padding: 20px;
+            border-radius: 16px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+            border: 1px solid rgba(极速赛车开奖结果查询官网，0, 0, 0.06);
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .message-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+        }
+
+        .message-content {
+            color: #1d1d1f;
+            line-height: 1.5;
+            margin-bottom: 16px;
+            font-size: 1rem;
+            font-weight: 400;
+        }
+
+        .message-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #8E8E93;
+            font-size: 0.85rem;
+            padding-top: 16px;
+            border-top: 1px solid rgba(0, 0, 0, 0.05);
+            margin-bottom: 12px;
+        }
+
+        .timestamp {
+            font-weight: 400;
+        }
+
+        .anonymous-badge {
+            background: rgba(0, 122, 255, 0.1);
+            color: #007AFF;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .reactions-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .reaction-button {
+            background: rgba(0, 0, 0, 0.05);
+            border: none;
+            padding: 8px 16px;
+            border-radius: 16px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-weight: 500;
+        }
+
+        .reaction-button:hover {
+            background: rgba(0, 0, 0, 0.08);
+            transform: scale(1.05);
+        }
+
+        .reaction-button.active {
+            background: rgba(0, 122, 255, 0.1);
+            color: #007AFF;
+        }
+
+        .reaction-button.heart.active {
+            background: rgba(255, 59, 48, 0.1);
+            color: #FF3B30;
+        }
+
+        .reaction-button.sad.active {
+            background: rgba(255, 149, 0, 0.1);
+            color: #FF9500;
+        }
+
+        .reaction-button.happy.active {
+            background: rgba(255, 149, 0, 0.1);
+            color: #FF9500;
+        }
+
+        .reaction-count {
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .reply-container {
+            display: flex;
+            gap: 8px;
+        }
+
+        .reply-input {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #E5E5EA;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        .reply-input:focus {
+            outline: none;
+            border-color: #007AFF;
+        }
+
+        .reply-button {
+            background: #007AFF;
+            color: white;
+            border: none;
+            padding: 12px 16px;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .replies-section {
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .reply {
+            background: rgba(0, 0, 0, 0.03);
+            padding: 12px;
+            border-radius: 12px;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+
+        .reply-meta {
+            font-size: 0.8rem;
+            color: #8E8E93;
+            margin-top: 4px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 80px 20px;
+            color: #8E8E93;
+        }
+
+        .empty-state h3 {
+            font-size: 1.2rem;
+            font-weight: 6在线开奖结果00;
+            margin-bottom: 8px;
+            color: #1d1d1f;
+        }
+
+        .empty-state p {
+            font-size: 1rem;
+            margin-bottom: 0;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 122, 255, 0.95);
+            color: white;
+            padding: 16px 24px;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+            transform: translateX(100%);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 1000;
+            font-weight: 500;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 16px;
+            }
+            
+            .header {
+                padding: 30px 16px 20px;
+            }
+            
+            .header h1 {
+                font-size: 2.2rem;
+            }
+            
+            .messages-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .post-form {
+                padding: 20px;
+            }
+            
+            .reactions-container {
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .header p {
+                font-size: 1rem;
+            }
+            
+            .btn {
+                width: 100%;
+            }
+            
+            .reaction-button {
+                padding: 6px 12px;
+                font-size: 0.8rem;
+            }
+        }
+
+        /* iOS-style emoji enhancements */
+        .emoji {
+            font-family: "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+            font-size: 1.1em;
+            vertical-align: middle;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>PastePal</h1>
+            <p>Share your thoughts anonymously</p>
+        </div>
+
+        <div class="post-form">
+            <div class="form-group">
+                <label for="message">Your Note</label>
+                <textarea id="message" placeholder="What's on your mind? ✨" maxlength="280" oninput="updateCharacterCount()"></textarea>
+                <div class="character-count" id="character-count">0/280</div>
+            </div>
+            <button class="btn" onclick="postMessage()">Post Note</button>
+        </div>
+
+        <div id="messages-container">
+            <div class="empty-state" id="empty-state">
+                <h3>Your wall is empty</h3>
+                <p>Add your first note to get started</p>
+            </div>
+            <div class="messages-grid" id="messages-grid" style="display: none;"></div>
+        </div>
+    </div>
+
+    <div class="notification" id="notification">Note posted successfully! 🎉</div>
+
+    <script>
+        let messages = JSON.parse(localStorage.getItem('pastePalMessages')) || [];
+        
+        function showNotification(text) {
+            const notification = document.getElementById('notification');
+            notification.textContent = text;
+            notification.classList.add('show');
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+        
+        function updateCharacterCount() {
+            const textarea = document.getElementById('message');
+            const counter = document.getElementById('character-count');
+            const count = textarea.value.length;
+            counter.textContent = `${count}/280`;
+            
+            if (count > 250) {
+                counter.style.color = '#FF3B30';
+            } else if (count > 200) {
+                counter.style.color = '#FF9500';
+            } else {
+                counter.style.color = '#8E8E93';
+            }
+        }
+        
+        function postMessage() {
+            const messageInput = document.getElementById('message');
+            const messageText = messageInput.value.trim();
+            
+            if (!messageText) {
+                alert('Please write something before posting!');
+                return;
+            }
+            
+            if (messageText.length > 280) {
+                alert('Note is too long! Maximum 280 characters.');
+                return;
+            }
+            
+            const newMessage = {
+                id: Date.now(),
+                content: messageText,
+                timestamp: new Date().toLocaleString('en-US', {
+                    hour: 'numeric',
+                    minute: '2-digit',
+                    month: 'short',
+                    day: 'numeric'
+                }),
+                isAnonymous: true,
+                reactions: {
+                    heart: 0,
+                    sad: 0,
+                    happy: 0
+                },
+                userReactions: {},
+                replies: []
+            };
+            
+            messages.unshift(newMessage);
+            localStorage.setItem('pastePalMessages', JSON.stringify(messages));
+            
+            messageInput.value = '';
+            document.getElementById('character-count').textContent = '0/280';
+            document.getElementById('character-count').style.color = '#8E8E93';
+            renderMessages();
+            showNotification('Note posted successfully! 🎉');
+        }
+        
+        function reactToMessage(messageId, reactionType) {
+            const message = messages.find(m => m.id === messageId);
+            if (!message) return;
+            
+            const userReactions = message.userReactions || {};
+            const currentReaction = userReactions['default'] || '';
+            
+            if (currentReaction === reactionType) {
+                // Remove reaction
+                message.reactions[reactionType] = Math.max(0, message.reactions[reactionType] - 1);
+                userReactions['default'] = '';
+                showNotification('Reaction removed');
+            } else {
+                // Remove previous reaction if any
+                if (currentReaction) {
+                    message.reactions[currentReaction] = Math.max(0, message.reactions[currentReaction] - 1);
+                }
+                // Add new reaction
+                message.reactions[reactionType]++;
+                userReactions['default'] = reactionType;
+                showNotification(`Reacted with ${reactionType === 'heart' ? '❤️' : reactionType === 'sad' ? '😢' : '😆'}`);
+            }
+            
+            message.userReactions = userReactions;
+            localStorage.setItem('pastePalMessages', JSON.stringify(messages));
+            renderMessages();
+        }
+        
+        function replyToMessage(messageId) {
+            const message = messages.find(m => m.id === messageId);
+            if (!message) return;
+            
+            const replyInput = document.getElementById(`reply-input-${messageId}`);
+            const replyText = replyInput ? replyInput.value.trim() : '';
+            
+            if (!replyText) {
+                alert('Please write a reply!');
+                return;
+            }
+            
+            const newReply = {
+                id: Date.now(),
+                content: replyText,
+                timestamp: new Date().toLocaleString('en-US', {
+                    hour: 'numeric',
+                    minute: '2-digit',
+                    month: 'short',
+                    day: 'numeric'
+                }),
+                isAnonymous: true
+            };
+            
+            message.replies.push(newReply);
+            localStorage.setItem('pastePalMessages', JSON.stringify(messages));
+            
+            if (replyInput) {
+                replyInput.value = '';
+            }
+            
+            renderMessages();
+            showNotification('Reply posted! 💬');
+        }
+        
+        function renderMessages() {
+            const messagesGrid = document.getElementById('messages-grid');
+            const emptyState = document.getElementById('empty-state');
+            
+            if (messages.length === 0) {
+                messagesGrid.style.display = 'none';
+                emptyState.style.display = 'block';
+                return;
+            }
+            
+            emptyState.style.display = 'none';
+            messagesGrid.style.display = 'grid';
+            
+            messagesGrid.innerHTML = '';
+            
+            messages.forEach(message => {
+                const messageCard = document.createElement('div');
+                messageCard.className = 'message-card';
+                
+                const userReaction = message.userReactions ? message.userReactions['default'] || '' : '';
+                
+                messageCard.innerHTML = `
+                    <div class="message-content">${escapeHtml(message.content)}</div>
+                    <div class="message-meta">
+                        <span class="timestamp">${message.timestamp}</span>
+                        <span class="anonymous-badge">Anonymous</span>
+                    </div>
+                    
+                    <div class="reactions-container">
+                        <button class="reaction-button heart ${userReaction === 'heart' ? 'active' : ''}" 
+                                onclick="reactToMessage(${message.id}, 'heart')">
+                            ❤️ <span class="reaction-count">${message.reactions?.heart || 0}</span>
+                        </button>
+                        <button class="reaction-button sad ${userReaction === 'sad' ? 'active' : ''}" 
+                                onclick="reactToMessage(${message.id}, 'sad')">
+                            😢 <span class="reaction-count">${message.reactions?.sad || 0}</span>
+                        </button>
+                        <button class="reaction-button happy ${userReaction === 'happy' ? 'active' : ''}" 
+                                onclick="reactToMessage(${message.id}, 'happy')">
+                            😆 <span class="reaction-count">${message.reactions?.happy || 0}</span>
+                        </button>
+                    </div>
+                    
+                    <div class="reply-container">
+                        <input type="text" 
+                               id="reply-input-${message.id}" 
+                               class="reply-input" 
+                               placeholder="Write a reply..." 
+                               maxlength="140">
+                        <button class="reply-button" onclick="replyToMessage(${message.id})">Reply</button>
+                    </div>
+                    
+                    ${message.replies && message.replies.length > 0 ? `
+                        <div class="replies-section">
+                            ${message.replies.map(reply => `
+                                <div class="reply">
+                                    <div>${escapeHtml(reply.content)}</div>
+                                    <div class="reply-meta">${reply.timestamp} • Anonymous</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    ` : ''}
+                `;
+                
+                messagesGrid.appendChild(messageCard);
+            });
+        }
+        
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', function() {
+            updateCharacterCount();
+            renderMessages();
+            
+            // Add some sample messages if empty
+            if (messages.length === 0) {
+                const sampleMessages = [
+                    "Love the clean design of this app! 🌟",
+                    "What a beautiful way to share thoughts anonymously 💭",
+                    "The iOS aesthetic is so pleasing to use 📱",
+                    "Minimal and functional - perfect combination ✨",
+                    "Hello from the other side of the screen! 👋"
+                ];
+                
+                sampleMessages.forEach((content, index) => {
+                    messages.push({
+                        id: Date.now() - index * 1000,
+                        content: content,
+                        timestamp: new Date(Date.now() - index * 3600000).toLocaleString('en-US', {
+                            hour: 'numeric',
+                            minute: '2-digit',
+                            month: 'short',
+                            day: 'numeric'
+                        }),
+                        isAnonymous: true,
+                        reactions: {
+                            heart: Math.floor(Math.random() * 5),
+                            sad: Math.floor(Math.random() * 3),
+                            happy: Math.floor(Math.random() * 8)
+                        },
+                        userReactions: {},
+                        replies: []
+                    });
+                });
+                
+                localStorage.setItem('pastePalMessages', JSON.stringify(messages));
+                renderMessages();
+            }
+        });
+        
+        // Add enter key support for posting (with shift for new line)
+        document.getElementById('message').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                postMessage();
+            }
+        });
+    </script>
+</body>
+</html>
